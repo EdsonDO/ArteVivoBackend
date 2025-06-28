@@ -57,7 +57,7 @@ class AsientoViewSet(viewsets.ModelViewSet):
 class EntradaViewSet(viewsets.ModelViewSet):
     queryset = models.Entrada.objects.all()
     serializer_class = serializers.EntradaSerializador
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
 # --------------------------
 # Vista de Pago
