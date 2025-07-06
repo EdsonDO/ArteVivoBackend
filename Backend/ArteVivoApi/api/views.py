@@ -1,77 +1,73 @@
-from rest_framework import viewsets, permissions
-from rest_framework.response import Response
+from rest_framework import viewsets, permissions, generics
+
+from rest_framework.parsers import MultiPartParser, FormParser
+
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from . import models
+from . import serializers
 
-from . import models, serializers
+# --- VISTAS ESPECIALIZADAS PARA EL FRONTEND ---
+class EventoDestacadoListView(generics.ListAPIView):
+    queryset = models.Evento.objects.filter(es_destacado=True).order_by('fecha_inicio')
+    serializer_class = serializers.EventoSerializador
+    permission_classes = [permissions.AllowAny]
 
-# --------------------------
-# Vista de Rol
-# --------------------------
+class EventoPromocionadoListView(generics.ListAPIView):
+    queryset = models.Evento.objects.filter(es_promocionado=True).order_by('fecha_inicio')
+    serializer_class = serializers.EventoSerializador
+    permission_classes = [permissions.AllowAny]
 
-class RolViewSet(viewsets.ModelViewSet):
-    queryset = models.Rol.objects.all()
-    serializer_class = serializers.RolSerializador
-    permission_classes = [permissions.IsAuthenticated]
+# --- VISTAS COMPLETAS TIPO "NAVAJA SUIZA" (CRUD Completo) ---
+class CategoriaViewSet(viewsets.ModelViewSet):
+    queryset = models.Categoria.objects.all()
+    serializer_class = serializers.CategoriaSerializador
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser)
 
-# --------------------------
-# Vista de Usuario
-# --------------------------
+class EventoViewSet(viewsets.ModelViewSet):
+    queryset = models.Evento.objects.all()
+    serializer_class = serializers.EventoSerializador
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser)
+
+class LugarViewSet(viewsets.ModelViewSet):
+    queryset = models.Lugar.objects.all()
+    serializer_class = serializers.LugarSerializador
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class AsientoViewSet(viewsets.ModelViewSet):
+    queryset = models.Asiento.objects.all()
+    serializer_class = serializers.AsientoSerializador
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+# --- VISTAS PROTEGIDAS (CRUD Completo, pero requieren Login) ---
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = models.Usuario.objects.all()
     serializer_class = serializers.UsuarioSerializador
     permission_classes = [permissions.IsAuthenticated]
 
-# --------------------------
-# Vista de Lugar
-# --------------------------
-
-class LugarViewSet(viewsets.ModelViewSet):
-    queryset = models.Lugar.objects.all()
-    serializer_class = serializers.LugarSerializador
-    permission_classes = [permissions.IsAuthenticated]
-
-# --------------------------
-# Vista de Evento
-# --------------------------
-
-class EventoViewSet(viewsets.ModelViewSet):
-    queryset = models.Evento.objects.all()
-    serializer_class = serializers.EventoSerializador
-    permission_classes = [permissions.IsAuthenticated]
-
-# --------------------------
-# Vista de Asiento
-# --------------------------
-
-class AsientoViewSet(viewsets.ModelViewSet):
-    queryset = models.Asiento.objects.all()
-    serializer_class = serializers.AsientoSerializador
-    permission_classes = [permissions.IsAuthenticated]
-
-# --------------------------
-# Vista de Entrada
-# --------------------------
-
 class EntradaViewSet(viewsets.ModelViewSet):
     queryset = models.Entrada.objects.all()
     serializer_class = serializers.EntradaSerializador
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
-# --------------------------
-# Vista de Pago
-# --------------------------
+    def get_queryset(self):
+        return models.Entrada.objects.filter(usuario=self.request.user)
 
 class PagoViewSet(viewsets.ModelViewSet):
     queryset = models.Pago.objects.all()
     serializer_class = serializers.PagoSerializador
     permission_classes = [permissions.IsAuthenticated]
 
-# --------------------------
-# Token personalizado (Login API)
-# --------------------------
+    def get_queryset(self):
+        return models.Pago.objects.filter(entrada__usuario=self.request.user)
 
+
+# --- VISTA DE LOGIN ---
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -83,4 +79,5 @@ class CustomAuthToken(ObtainAuthToken):
             'user_id': user.pk,
             'username': user.username
         })
+
 # By: Edson DO

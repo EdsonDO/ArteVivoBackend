@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,14 +48,13 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'api.middleware.APIKeyMiddleware'
-    
+    # 'api.middleware.APIKeyMiddleware' 
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -84,7 +84,7 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-API_KEY = '0PusHseewlbCvHZRtzIueT1DDpI0fw9oUxkOAf9db1ToVme88sSkGC50HEpzHCMEJ0ICuB5FLwQoY91tH3Jg3itcRbhwyzvm17s7E3uPYY8PVtaLPgXfTiTmZ4y55h2x'
+#API_KEY = '0PusHseewlbCvHZRtzIueT1DDpI0fw9oUxkOAf9db1ToVme88sSkGC50HEpzHCMEJ0ICuB5FLwQoY91tH3Jg3itcRbhwyzvm17s7E3uPYY8PVtaLPgXfTiTmZ4y55h2x'
 
 ROOT_URLCONF = 'ArteVivoApi.urls'
 
@@ -157,5 +157,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- CONFIGURACIÓN DE ARCHIVOS MULTIMEDIA (MEDIA) ---
+# Esta es la URL pública que se usará para acceder a los archivos desde el navegador.
+# Ejemplo: http://127.0.0.1:8000/media/eventos/mi_imagen.png
+MEDIA_URL = '/media/'
+
+# Esta es la ruta absoluta en tu disco duro donde se guardarán los archivos subidos.
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # By: Edson DO
